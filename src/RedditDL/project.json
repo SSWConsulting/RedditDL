@@ -27,7 +27,11 @@
         "Microsoft.Framework.Logging.Console": "1.0.0-beta6",
         "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-beta6",
         "RedditSharp": "1.0.18",
-        "Microsoft.ApplicationInsights": "1.2.0"
+        "Microsoft.ApplicationInsights": "1.2.0",
+        "Microsoft.ApplicationInsights.Web": "1.2.1",
+        "Serilog.Sinks.Seq": "1.5.15",
+        "Serilog.Framework.Logging": "1.0.0-beta-43",
+        "Serilog.Sinks.ApplicationInsights": "2.0.21"
     },
 
     "commands": {
@@ -52,6 +56,6 @@
         "**.vspscc"
     ],
     "scripts": {
-        "prepublish": [ "npm install", "bower install", "gulp default"]
+        "prepublish": [ "npm install", "bower install", "gulp default" ]
     }
 }

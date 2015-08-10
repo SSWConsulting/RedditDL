@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNet.Authentication.Facebook;
 using Microsoft.AspNet.Authentication.Google;
 using Microsoft.AspNet.Authentication.MicrosoftAccount;
@@ -23,6 +25,8 @@ using Microsoft.Framework.Runtime;
 using RedditDL.Models;
 using RedditDL.Services;
 using RedditSharp;
+using Serilog;
+using Serilog.Framework.Logging;
 
 namespace RedditDL
 {
@@ -51,6 +55,8 @@ namespace RedditDL
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<AppSettings>(Configuration.GetConfigurationSection("AppSettings"));
+
             // Add Entity Framework services to the services container.
             services.AddEntityFramework()
                 .AddSqlServer()
@@ -89,13 +95,25 @@ namespace RedditDL
             services.AddTransient<ISmsSender, AuthMessageSender>();
 
             services.AddSingleton<IRedditService, RedditService>();
+
+            services.AddScoped<TelemetryClient>();
+            services.AddScoped<TelemetryConfiguration>();
         }
 
         // Configure is called after ConfigureServices is called.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            var appInsightsKey = "21f8fdc0-f48b-435b-a043-13e399db4531";
+
+            var serilogger = new LoggerConfiguration()
+                .WriteTo.ApplicationInsights(appInsightsKey)
+                .WriteTo.Seq("http://localhost:5341")
+                .CreateLogger();
+
             loggerFactory.MinimumLevel = LogLevel.Information;
             loggerFactory.AddConsole();
+            loggerFactory.AddSerilog(serilogger);
+            Log.Logger = serilogger;
 
             // Configure the HTTP request pipeline.
 
@@ -139,6 +157,10 @@ namespace RedditDL
 
             // Configure RedditSharp
             WebAgent.UserAgent = "RedditDL by Ben Cull [SSW]";
+
+            // Application Insights
+            TelemetryConfiguration.Active.InstrumentationKey = appInsightsKey;
+            TelemetryConfiguration.Active.TelemetryChannel.DeveloperMode = true;
         }
     }
 }

@@ -4,18 +4,27 @@ using System.Configuration;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Microsoft.Framework.OptionsModel;
+using RedditDL.Models;
 using RedditSharp;
+using Serilog;
 
 namespace RedditDL.Services
 {
     public class RedditService : IRedditService
     {
-        public async Task PostOrComment(string title, string body)
-        {
-            var subreddit = ConfigurationManager.AppSettings["DefaultSubreddit"];
+        private readonly ILogger _logger = Log.ForContext(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly IOptions<AppSettings> _appSettings;
 
+        public RedditService(IOptions<AppSettings> appSettings)
+        {
+            _appSettings = appSettings;
+        }
+
+        public async Task PostOrComment(string title, string body)
+        {            
             var reddit = GetReddit();
-            var sub = await reddit.GetSubredditAsync(subreddit);
+            var sub = await reddit.GetSubredditAsync(_appSettings.Options.DefaultSubreddit);
 
             title = title
                 .Replace("RE:", "").Replace("FW:", "")
@@ -36,9 +45,10 @@ namespace RedditDL.Services
 
         private Reddit GetReddit()
         {
-            var username = ConfigurationManager.AppSettings["RedditUsername"];
-            var password = ConfigurationManager.AppSettings["RedditPassword"];
-            return new Reddit(username, password, true);
+            var reddit = new Reddit(_appSettings.Options.RedditUsername, _appSettings.Options.RedditPassword, true);
+            reddit.CaptchaSolver = new CaptchaIgnorer();
+
+            return reddit;
         }
     }
 }
