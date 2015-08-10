@@ -1,0 +1,12 @@
+{
+    "AppSettings": {
+        "DefaultSubreddit": "bottest",
+        "RedditUsername": "testbotssw",
+        "RedditPassword": "testbotssw"
+    },
+  "Data": {
+    "DefaultConnection": {
+      "ConnectionString": "Server=(localdb)\\mssqllocaldb;Database=aspnet5-RedditDL-7428f8d5-ef28-4568-b19c-fc29cdec1659;Trusted_Connection=True;MultipleActiveResultSets=true"
+    }
+  }
+}
