@@ -28,12 +28,14 @@ namespace RedditDL.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Webhook()
-        {            
+        {
             try
             {
                 // This is done manually thanks to MVC6's weird model binding that won't pick up dashes in names.
                 var form = await Request.ReadFormAsync();
-                var subject = form["Subject"];
+
+                // Mailgun sends two subject fields, we only want the first one
+                var subject = form.GetValues("subject").FirstOrDefault();
                 var text = form["stripped-text"];
 
                 await _redditService.PostOrComment(subject, text);
